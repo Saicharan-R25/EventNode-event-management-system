@@ -1,263 +1,320 @@
-# Project Architecture Diagram
+# Tender Analyzer - Architecture Diagram
 
-## High-Level System Architecture
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                         Frontend Application                     │
-│                      (React 19 + TypeScript)                     │
-└─────────────────────────────────────────────────────────────────┘
-                                 │
-                    ┌────────────┴────────────┐
-                    │                         │
-         ┌──────────▼──────────┐   ┌─────────▼──────────┐
-         │    State Management │   │  Styling & Layout  │
-         │     (Zustand)       │   │  (Tailwind CSS)    │
-         └─────────────────────┘   └────────────────────┘
-                    │
-    ┌───────────────┼───────────────┐
-    │               │               │
-┌───▼────┐  ┌──────▼──────┐  ┌────▼────────┐
-│ Stores │  │ Components  │  │   Features  │
-└────────┘  └─────────────┘  └─────────────┘
-```
-
-## Project Structure
+## System Overview
 
 ```
-final-yr-proj/
-├── index.tsx                    # Application Entry Point
-├── index.html                   # HTML Template
-├── index.css                    # Global Styles
-├── App.tsx                      # Root Component (Main Layout)
-├── store.ts                     # Zustand State Management
-├── metadata.json                # Configuration/Metadata
-├── vite.config.ts              # Vite Build Configuration
-├── tsconfig.json               # TypeScript Configuration
-├── package.json                # Dependencies
-│
-├── components/                  # Reusable UI Components
-│   └── ui/
-│       └── Button.tsx           # Base Button Component
-│
-└── features/                    # Feature Modules
-    ├── Dashboard.tsx            # Main Contract Dashboard (Kanban Board)
-    ├── TenderUpload.tsx         # Tender/Contract Upload Feature
-    ├── TenderDetailsModal.tsx   # Contract Details Viewer
-    ├── DriverNegotiation.tsx    # Driver Cost Negotiation
-    └── TrashModal.tsx           # Deleted Contracts Recovery
-```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         TENDER ANALYZER SYSTEM                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 
-## Component Hierarchy
-
-```
-App.tsx (Root)
-│
-├── Navbar (Theme Toggle, Tab Navigation)
-├── Split View Layout
-│   ├── Sidebar Navigation
-│   └── Main Content Area
-│       │
-│       ├── Dashboard Tab
-│       │   ├── Dashboard.tsx (Kanban Board)
-│       │   │   ├── Column Components
-│       │   │   │   ├── Contract Cards
-│       │   │   │   │   ├── TenderDetailsModal
-│       │   │   │   │   └── DriverNegotiation
-│       │   │   │   └── Search & Filter Bar
-│       │   │   └── Drag & Drop Context (@dnd-kit)
-│       │   │
-│       │   ├── TenderDetailsModal.tsx
-│       │   │   ├── Bid Details Display
-│       │   │   ├── Cost Breakdown
-│       │   │   └── Risk Analysis
-│       │   │
-│       │   ├── DriverNegotiation.tsx
-│       │   │   ├── Negotiation Form
-│       │   │   └── Cost Adjustment UI
-│       │   │
-│       │   └── TrashModal.tsx
-│       │       ├── Deleted Contracts List
-│       │       └── Restore Actions
-│       │
-│       └── Upload Tab
-│           └── TenderUpload.tsx
-│               ├── File Drop Zone
-│               ├── Contract Upload
-│               └── Batch Processing
-│
-└── Button.tsx (Reusable Component)
-```
-
-## Data Flow Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                   Zustand Store                         │
-│                  (store.ts)                             │
-│                                                         │
-│  State:                    Actions:                     │
-│  • contracts[]            • addContract()              │
-│  • deletedContracts[]     • updateContract()           │
-│  • columns[]              • moveContract()             │
-│  • theme                  • deleteContract()           │
-│  • negotiatingContract    • restoreContract()          │
-│  • activeDragId           • toggleTheme()              │
-│  • activeColumnId         • etc.                       │
-└──────────────────────┬──────────────────────────────────┘
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-        ▼              ▼              ▼
-    Dashboard     TenderUpload   TrashModal
-    (Read)        (Write)        (Restore)
-        │              │              │
-        └──────────────┼──────────────┘
-                       │
-                 Contract Updates
-```
-
-## Key Technologies Stack
-
-```
-Frontend Framework
-├── React 19.2.0         (UI Library)
-├── TypeScript 5.8       (Type Safety)
-└── Vite 6.2.0          (Build Tool)
-
-State Management
-└── Zustand 5.0.8       (Lightweight State)
-
-Styling & Animation
-├── Tailwind CSS         (Utility-First CSS)
-├── Framer Motion 12.23  (Smooth Animations)
-└── Lucide React 0.555   (Icons)
-
-Interaction Libraries
-├── React Router 7.9     (Routing)
-├── @dnd-kit/* 6.3+      (Drag & Drop)
-│   ├── @dnd-kit/core
-│   ├── @dnd-kit/sortable
-│   └── @dnd-kit/utilities
-├── react-dropzone 14.3  (File Upload)
-└── clsx 2.1.1          (Class Name Utilities)
-```
-
-## Feature Descriptions
-
-### 1. **Dashboard (Main Feature)**
-- **Type**: Kanban Board
-- **Purpose**: Manage contracts through different stages
-- **Stages**: Searching → Evaluating → Negotiating → Success
-- **Interactions**: 
-  - Drag & Drop contracts between columns
-  - View contract details
-  - Delete/Restore contracts
-  - Negotiate driver costs
-
-### 2. **Tender Upload**
-- **Purpose**: Import contracts from files
-- **Features**:
-  - Drag & drop file upload
-  - Batch contract processing
-  - Data validation
-
-### 3. **Tender Details Modal**
-- **Purpose**: Display full contract information
-- **Displays**:
-  - Bid costs breakdown
-  - Route & vehicle details
-  - Risk analysis
-  - Profit margins
-
-### 4. **Driver Negotiation**
-- **Purpose**: Negotiate driver costs for contracts
-- **Features**:
-  - Cost adjustment forms
-  - Real-time calculations
-
-### 5. **Trash/Recycle Bin**
-- **Purpose**: Recover deleted contracts
-- **Features**:
-  - View deleted contracts
-  - Restore contracts
-
-## State Management Flow
-
-```
-User Interaction
-    │
-    ▼
-Component Event Handler
-    │
-    ▼
-Zustand Store Action
-    │
-    ├─► Update State
-    │
-    └─► Component Re-render
-        │
-        ▼
-    Update UI
-```
-
-## Responsive Design
-
-```
-Split View Layout
-├── Resizable Divider
-├── Left Sidebar (Collapsible)
-└── Main Content Area (Responsive)
-    ├── Mobile: Single Column
-    ├── Tablet: Stacked Layout
-    └── Desktop: Full Split View
-```
-
-## Theme System
-
-```
-Light Mode (Default)
-├── Light Background
-├── Dark Text
-└── Subtle Shadows
-
-Dark Mode
-├── Dark Background
-├── Light Text
-└── Enhanced Contrast
-```
-
-## File Size Summary
-
-| File | Lines | Purpose |
-|------|-------|---------|
-| Dashboard.tsx | 1104 | Main kanban board logic |
-| TenderDetailsModal.tsx | 498 | Contract details display |
-| Store.ts | 114 | State management |
-| App.tsx | 204 | Root component |
-
----
-
-## Development Workflow
-
-```
-Development
-    │
-    npm run dev (Vite Dev Server)
-    │
-    ▼
-Build
-    │
-    npm run build (Production Build)
-    │
-    ▼
-Preview
-    │
-    npm run preview (Local Preview)
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            CLIENT LAYER                                      │
+│                     (Frontend - React/Dropzone)                              │
+│  ┌─────────────────────────────────────────────────────────────────────────┐ │
+│  │  File Upload Interface (react-dropzone)                                │ │
+│  │  - PDF file selection and drop zone                                    │ │
+│  │  - Progress tracking UI                                               │ │
+│  │  - Real-time streaming updates via SSE                                │ │
+│  └─────────────────────────────────────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                    ┌───────────────┼───────────────┐
+                    ▼               ▼               ▼
+        ┌─────────────────────────────────────────────────────┐
+        │         API LAYER (REST Endpoints)                  │
+        │  ┌──────────────────────────────────────────────┐  │
+        │  │ POST   /api/analyze        - Upload & process│  │
+        │  │ GET    /api/status/{jobId} - Get job status  │  │
+        │  │ GET    /api/stream/{jobId} - SSE stream      │  │
+        │  └──────────────────────────────────────────────┘  │
+        │            (Go HTTP Server - Gorilla Mux)          │
+        └─────────────────────────────────────────────────────┘
+                                    │
+        ┌───────────────┬───────────┼───────────┬──────────────┐
+        ▼               ▼           ▼           ▼              ▼
+┌──────────────┐ ┌──────────────┐ ┌─────────────────┐ ┌─────────────┐
+│  FILE INPUT  │ │ JOB STORE    │ │ TENDER ANALYZER │ │  LOGGING    │
+├──────────────┤ ├──────────────┤ ├─────────────────┤ ├─────────────┤
+│  PDF Files   │ │  In-Memory   │ │  Core Business  │ │  Real-time  │
+│  Uploads/    │ │  Job Status  │ │  Logic          │ │  Streaming  │
+│  folder      │ │  Tracking    │ │  - PDF extract  │ │  Logs       │
+└──────────────┘ └──────────────┘ │  - AI analysis  │ │  (SSE)      │
+                                   │  - Calculate    │ └─────────────┘
+                                   │    bid breakdown│
+                                   └─────────────────┘
+                                    │
+        ┌───────────────┬───────────┼───────────┐
+        ▼               ▼           ▼
+┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│ GOOGLE SHEETS    │ │  GOOGLE GEMINI   │ │   PDF LIBRARY    │
+│ API              │ │  AI API          │ │  (ledongthuc)    │
+├──────────────────┤ ├──────────────────┤ ├──────────────────┤
+│ Truck pricing    │ │ AI-powered       │ │ PDF text         │
+│ data retrieval   │ │ tender analysis  │ │ extraction       │
+└──────────────────┘ └──────────────────┘ └──────────────────┘
+        │                   │                     │
+        └───────────────────┼─────────────────────┘
+                            ▼
+        ┌─────────────────────────────────────────┐
+        │      CONFIGURATION & CREDENTIALS        │
+        ├─────────────────────────────────────────┤
+        │ .env                 - Environment vars  │
+        │ credentials.json     - Google OAuth      │
+        │ go.mod/go.sum        - Go dependencies   │
+        │ package.json         - NPM dependencies  │
+        └─────────────────────────────────────────┘
+                            │
+                            ▼
+        ┌─────────────────────────────────────────┐
+        │         OUTPUT DATA STRUCTURES          │
+        ├─────────────────────────────────────────┤
+        │ BidBreakdown:                           │
+        │ - bid_cost                              │
+        │ - vehicle_driver_cost                   │
+        │ - fuel_cost                             │
+        │ - tolls_and_misc                        │
+        │ - profit_margin                         │
+        │ - material_type                         │
+        └─────────────────────────────────────────┘
 ```
 
 ---
 
-**Generated**: January 4, 2026
-**Framework**: React 19 + TypeScript + Vite
-**Key Pattern**: Component-based with Zustand state management
+## Component Details
+
+### 1. **Client Layer** (Frontend)
+- **Technology**: React + react-dropzone
+- **Responsibilities**:
+  - PDF file upload interface
+  - Progress tracking
+  - Real-time streaming updates
+  - Display bid breakdown results
+
+### 2. **API Layer** (REST Server)
+- **Framework**: Go + Gorilla Mux
+- **Port**: Configurable (default from environment)
+- **Endpoints**:
+  - `POST /api/analyze` - Upload PDF for analysis
+  - `GET /api/status/{jobId}` - Check job status
+  - `GET /api/stream/{jobId}` - Server-Sent Events stream
+
+### 3. **Business Logic Layer**
+
+#### **TenderAnalyzer**
+- Orchestrates the analysis workflow
+- Manages interactions with external services
+
+#### **JobStore**
+- In-memory job tracking
+- Maintains:
+  - Job status (pending, processing, completed, failed)
+  - Progress percentage
+  - Real-time logs
+  - Final results
+
+#### **Core Processors**
+- **PDF Extraction**: Extracts text from PDF files
+- **AI Analysis**: Uses Google Gemini API for intelligent tender analysis
+- **Data Calculation**: Computes bid breakdown
+
+### 4. **External Services**
+
+#### **Google Sheets API**
+- Retrieves truck pricing data
+- Supports:
+  - Truck types
+  - Weight capacity
+  - Rate per km
+  - Driver allowances
+  - Base hiring charges
+
+#### **Google Gemini API**
+- AI-powered tender document analysis
+- Extracts:
+  - Material requirements
+  - Weight specifications
+  - Distance information
+  - Cost factors
+
+#### **PDF Processing**
+- Library: ledongthuc/pdf
+- Functionality: Text extraction from PDF documents
+
+### 5. **Data Structures**
+
+```go
+Config {
+  GeminiAPIKey
+  GoogleSheetsID
+  CredentialsPath
+  ProfitMarginPct
+  NegotiationBuffer
+}
+
+TruckData {
+  TruckType
+  MaxWeightTons
+  RatePerKm
+  DriverAllowanceDay
+  BaseHiringCharge
+}
+
+BidBreakdown {
+  BidCost
+  VehicleDriverCost
+  FuelCost
+  TollsAndMisc
+  ProfitMargin
+  MaterialType
+}
+
+JobStatus {
+  JobID
+  FileName
+  Status
+  Progress
+  StartTime
+  Logs []LogEntry
+  Result *BidBreakdown
+  Error
+}
+```
+
+### 6. **File Structure**
+
+```
+tender-analyzer/
+├── main.go                 # Backend server (Go)
+├── go.mod & go.sum         # Go dependencies
+├── package.json            # Frontend dependencies
+├── node_modules/           # NPM packages
+├── .env                    # Environment variables
+├── credentials.json        # Google OAuth credentials
+├── bid_breakdown.json      # Sample output format
+├── tender.pdf              # Sample input
+└── uploads/                # PDF upload folder
+```
+
+---
+
+## Data Flow
+
+```
+1. USER UPLOADS PDF
+   │
+   ├─→ File saved to uploads/ folder
+   │
+   ├─→ JobStore creates tracking record
+   │
+   └─→ Return jobId to client
+
+2. SERVER PROCESSES TENDER
+   │
+   ├─→ Extract text from PDF
+   │   │
+   │   └─→ Use Google Sheets API
+   │       Fetch truck pricing data
+   │
+   ├─→ Send to Gemini AI for analysis
+   │   │
+   │   └─→ Extract: weight, distance, material type
+   │
+   ├─→ Calculate bid breakdown
+   │   ├─→ Vehicle + driver cost
+   │   ├─→ Fuel cost
+   │   ├─→ Tolls & misc
+   │   └─→ Apply profit margin
+   │
+   └─→ Store results in JobStore
+
+3. CLIENT RECEIVES UPDATES (SSE)
+   │
+   ├─→ Real-time logs via /api/stream/{jobId}
+   │
+   ├─→ Poll /api/status/{jobId} for completion
+   │
+   └─→ Display final BidBreakdown result
+```
+
+---
+
+## Technology Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| **Frontend** | React + react-dropzone | UI & file upload |
+| **Backend** | Go 1.25.5 | REST API server |
+| **Router** | Gorilla Mux | HTTP routing |
+| **AI/ML** | Google Gemini API | Document analysis |
+| **Data Source** | Google Sheets API | Truck pricing data |
+| **PDF Processing** | ledongthuc/pdf | PDF text extraction |
+| **Authentication** | Google OAuth 2.0 | Credentials handling |
+| **CORS** | rs/cors | Cross-origin handling |
+| **UUID** | google/uuid | Unique job tracking |
+| **Env Config** | joho/godotenv | Configuration management |
+
+---
+
+## API Contract
+
+### Upload & Analyze
+```
+POST /api/analyze
+Content-Type: multipart/form-data
+
+Body: PDF file
+
+Response:
+{
+  "jobId": "uuid-string"
+}
+```
+
+### Get Status
+```
+GET /api/status/{jobId}
+
+Response:
+{
+  "jobId": "uuid-string",
+  "fileName": "tender.pdf",
+  "status": "completed|pending|processing|failed",
+  "progress": 75.5,
+  "result": {
+    "bid_cost": 45000,
+    "vehicle_driver_cost": 12000,
+    "fuel_cost": 8500,
+    "tolls_and_misc": 2500,
+    "profit_margin": 22000,
+    "material_type": "sand"
+  },
+  "logs": [
+    {
+      "timestamp": "2026-01-04T10:30:00Z",
+      "message": "Processing started",
+      "type": "info"
+    }
+  ]
+}
+```
+
+### Stream Events
+```
+GET /api/stream/{jobId}
+
+Response: Server-Sent Events (SSE)
+data: {"message": "Extracting PDF...", "type": "info"}
+data: {"message": "Analyzing with AI...", "type": "info"}
+data: {"message": "Calculating costs...", "type": "info"}
+data: {"message": "Complete", "type": "success"}
+```
+
+---
+
+## Deployment Considerations
+
+- **Environment Variables**: GEMINI_API_KEY, GOOGLE_SHEETS_ID, GOOGLE_CREDENTIALS_PATH, PORT, PROFIT_MARGIN_PCT
+- **CORS**: Configured for cross-origin requests
+- **File Storage**: Upload folder requires write permissions
+- **Credentials**: Google OAuth credentials must be available
+- **Concurrency**: Thread-safe job store with mutex locking
